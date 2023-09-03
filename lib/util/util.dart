@@ -116,6 +116,11 @@ Future<Uint8List> getScreen (GlobalKey key) async {
   }
 }
 
+(int, int, int) getString() {
+
+  return (1, 2, 3);
+}
+
 void shareInfoImage(Uint8List uint8list) async {
   try {
     final tempDir = await getTemporaryDirectory();

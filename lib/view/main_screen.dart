@@ -135,14 +135,17 @@ class _MainState extends State<MainScreen> {
           }
 
           return ListView(
-            children: util.dataList.map((element) {
+            children: util.dataList.reversed.indexed.map((element) {
+              print(util.getString().$3);
               return ListTile(
+                selected: element.$1 == 0,
+                selectedTileColor: Colors.green[100],
                 leading: CircleAvatar(
-                  child: Image.network(util.getIcon(element.weatherList.first.icon)),
+                  child: Image.network(util.getIcon(element.$2.weatherList.first.icon)),
                 ),
-                title: Text(element.name),
-                subtitle: Text("${element.weatherList.first.main} - ${element.weatherList.first.description}"),
-                trailing: Text("${(element.main.temp - 273.15).toStringAsFixed(1)}°C"),
+                title: Text(element.$2.name),
+                subtitle: Text("${element.$2.weatherList.first.main} - ${element.$2.weatherList.first.description}"),
+                trailing: Text("${(element.$2.main.temp - 273.15).toStringAsFixed(1)}°C"),
                 onTap: () {
                   Navigator.pushNamed(context, "/info",
                       arguments: element
