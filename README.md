@@ -27,7 +27,8 @@ Follow these steps to install **fluttersimple: WEATHER APP**:
    git clone https://github.com/umamhafidul5/flutter-weather-app.git
 
 ### Usage
-
+![img.png](assets/img1.png)
+![img.png](assets/img2.png)
 ### Contributing
 We welcome contributions from the community! If you'd like to contribute to **fluttersimple: WEATHER APP**, please follow these guidelines:
 

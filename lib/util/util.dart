@@ -1,9 +1,16 @@
 import 'dart:convert';
+import 'dart:io';
+import 'dart:typed_data';
+import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
+import 'package:flutter_share_me/flutter_share_me.dart';
 import 'package:fluttersimple/view/setting_screen.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
+import 'package:path_provider/path_provider.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 import '../model/data.dart';
 import '../view/info_screen.dart';
@@ -45,18 +52,10 @@ Future<Data> fetchDataByPosition(Future<Position> location) async {
   String lat = "";
   String lon = "";
 
-  print("1111");
-  print("lat $lat");
-
   await location.then((value) {
     lat = value.latitude.toString();
-    print("2222");
-    print("lat $lat");
     lon = value.longitude.toString();
   });
-
-  print("3333");
-  print("lat $lat");
 
   var url =
   Uri.https(
@@ -84,9 +83,8 @@ void openAppSettings() async {
 }
 
 Future<bool> checkLocationPermission() async {
-  LocationPermission permission = await GeolocatorPlatform.instance.checkPermission();
 
-  return isAccessiblePosition = permission != LocationPermission.denied;
+  return isAccessiblePosition = await Permission.location.status.isGranted;
 }
 
 Future<Position> getLocation() async {
@@ -101,4 +99,34 @@ String getIcon(String iconCode) {
 
 String getFlag(String countryId) {
   return "https://openweathermap.org/images/flags/${countryId.toLowerCase()}.png";
+}
+
+Future<Uint8List> getScreen (GlobalKey key) async {
+  try {
+    RenderRepaintBoundary boundary = key.currentContext!.findRenderObject() as RenderRepaintBoundary;
+    ui.Image image = await boundary.toImage(pixelRatio: 3.0);
+
+    ByteData? byteData = await image.toByteData(format: ui.ImageByteFormat.png);
+
+    Uint8List uint8list = byteData!.buffer.asUint8List();
+
+    return uint8list;
+  } catch (e) {
+    return Uint8List(0);
+  }
+}
+
+void shareInfoImage(Uint8List uint8list) async {
+  try {
+    final tempDir = await getTemporaryDirectory();
+    final file = await File("${tempDir.path}/screenshot.png").create();
+    await file.writeAsBytes(uint8list);
+
+    await FlutterShareMe().shareToWhatsApp(
+      imagePath: file.path,
+    );
+
+  } catch (e) {
+    throw Exception(e.toString());
+  }
 }

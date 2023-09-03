@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:geolocator/geolocator.dart';
+import 'package:permission_handler/permission_handler.dart' as ph;
 
 import '../util/util.dart' as util;
 
@@ -11,8 +11,10 @@ class SettingScreen extends StatefulWidget {
 }
 
 class _SettingScreenState extends State<SettingScreen> {
+
   @override
   Widget build(BuildContext context) {
+
     return Scaffold(
       appBar: AppBar(
         title: const Text("Setting", style: TextStyle(fontSize: 17),),
@@ -22,28 +24,60 @@ class _SettingScreenState extends State<SettingScreen> {
           PopupMenuButton(
             itemBuilder: (context) {
               return [
-                const PopupMenuItem(
-                  onTap: util.openAppSettings,
-                  child: Text("Open App Settings"),
+                PopupMenuItem(
+                  onTap: () async {
+                    util.isAccessiblePosition
+                        ? await ph.openAppSettings()
+                        : await ph.Permission.location.request();
+
+                    setState(() {
+                      util.checkLocationPermission();
+                    });
+                  },
+                  child: const Text("Open App Settings"),
                 )
               ];
-            },)
+            },
+          ),
         ],
       ),
 
-      body: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 35),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            const Text("Location is permitted", style: TextStyle(fontSize: 17),),
-            const SizedBox(width: 10,),
-            Switch(
-              value: util.isAccessiblePosition,
-              onChanged: (bool value) {  },
+      body: FutureBuilder<bool>(
+        future: util.checkLocationPermission(),
+        builder: (BuildContext context, AsyncSnapshot<bool> snapshot) {
+          return Padding(
+            padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 35),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text("Location is permitted", style: TextStyle(fontSize: 17),),
+                const SizedBox(width: 10,),
+                Switch(
+                  value: util.isAccessiblePosition,
+                  onChanged: (bool value) async {
+                    await ph.Permission.location.request();
+
+                    setState(() {
+                      util.checkLocationPermission();
+                    });
+
+                    if (!value) {
+                      if (!context.mounted) return;
+                      showDialog(
+                          context: context,
+                          builder: (context) => AlertDialog(
+                            title: Text("Location is "
+                                "${util.isAccessiblePosition ? "Permitted" : "Prohibited"}"
+                            ),
+                          )
+                      );
+                    }
+                  },
+                ),
+              ],
             ),
-          ],
-        ),
+          );
+        }
       )
     );
   }
