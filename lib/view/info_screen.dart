@@ -10,7 +10,8 @@ class InfoScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Data data = ModalRoute.of(context)?.settings.arguments as Data;
+    final (int, Data) rawData = ModalRoute.of(context)?.settings.arguments as (int, Data);
+    final Data data = rawData.$2;
     final DateTime dt = DateTime.fromMillisecondsSinceEpoch((data.dt*1000).toInt());
 
     GlobalKey key = GlobalKey();
@@ -46,7 +47,7 @@ class InfoScreen extends StatelessWidget {
                     padding: const EdgeInsets.only(top: 25),
                     child: Column(
                       children: [
-                        Text(data.name, style: const TextStyle(
+                        Text("${data.name}, ${data.sys.country}", style: const TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.w500,
                           color: Colors.white,),),
